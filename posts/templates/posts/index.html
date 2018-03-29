@@ -1,0 +1,14 @@
+{% extends 'posts/layout.html' %}
+
+{% block content %}
+<h3 class="center-align red lighten-3">{{ title }}</h3>
+<form method="POST" action="">
+    {% csrf_token %}
+    <p>Summoner Name: </p>
+    {{ form.summoner_name }}
+    <p>Region: </p>
+    {{ form.region }}
+    <br><br><br>
+    <input type="submit" class="waves-effect waves-light btn" value="Search">
+</form>
+{% endblock %}
