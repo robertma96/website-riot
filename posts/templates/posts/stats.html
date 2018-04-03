@@ -1,0 +1,31 @@
+{% extends 'posts/layout.html' %}
+{% block content %}
+   <div class="col s12 m8 offset-m2 l6 offset-l3">
+        <div class="card-panel grey lighten-5 z-depth-1">
+          <div class="row valign-wrapper">
+            <div class="col s2">
+              <img src="{{ icon }}" alt="" class="circle responsive-img">
+                <div class="center-align">
+                    <h5>Level {{ summonerlevel }}</h5>
+                </div>
+            </div>
+            <div class="col s4">
+              <span class="black-text">
+                  <h1><b>{{ name }}</b></h1>
+              </span>
+            </div>
+            <div class="col s2">
+                {% load static %}
+                <img src="/static/posts/{{tier_icon}}" alt="" class="responsive-img"/>
+            </div>
+            <div class="col s3">
+                <span class="black-text">
+                    <h3 class="left-align">{{ tier }}</h3>
+                    <h5><b>{{ leaguepoints }}</b> / {{ wins }} {{ losses }}</h5>
+                    <h5>Win Ratio {{ winrate }}</h5>
+                </span>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock%}

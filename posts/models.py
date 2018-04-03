@@ -16,6 +16,7 @@ class Posts(models.Model):
     accountID = models.IntegerField(default=0)
     summonerID = models.IntegerField(default=0)
     gamesPlayed = models.TextField()
+    championsPlayed = models.TextField()
     created_at = models.DateTimeField(default=datetime.now, blank=True)
 
     def __str__(self):
