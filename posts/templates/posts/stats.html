@@ -1,31 +1,117 @@
 {% extends 'posts/layout.html' %}
 {% block content %}
-   <div class="col s12 m8 offset-m2 l6 offset-l3">
-        <div class="card-panel grey lighten-5 z-depth-1">
-          <div class="row valign-wrapper">
-            <div class="col s2">
-              <img src="{{ icon }}" alt="" class="circle responsive-img">
+
+<section class="mainstats">
+    <div class="container">
+        <div class="row valign-wrapper">
+            <div class="column">
+                <div class="center-align">
+                    <img src="{{ icon }}" alt="" class="circle" width="120" height="120">
+                </div>
                 <div class="center-align">
                     <h5>Level {{ summonerlevel }}</h5>
                 </div>
             </div>
-            <div class="col s4">
+            <div class="column">
               <span class="black-text">
-                  <h1><b>{{ name }}</b></h1>
+                  <b>{{ name }}</b>
               </span>
             </div>
-            <div class="col s2">
+            <div class="column">
                 {% load static %}
-                <img src="/static/posts/{{tier_icon}}" alt="" class="responsive-img"/>
+                <img src="/static/posts/{{tier_icon}}" alt="" width="150" height="150"/>
             </div>
-            <div class="col s3">
+            <div class="right">
+                <div class="column">
                 <span class="black-text">
-                    <h3 class="left-align">{{ tier }}</h3>
+                    <h5 class="left-align"><span class="blue-text"> {{ tier }}</h5></span>
                     <h5><b>{{ leaguepoints }}</b> / {{ wins }} {{ losses }}</h5>
                     <h5>Win Ratio {{ winrate }}</h5>
                 </span>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
+    </div>
+</section>
+
+<section class="licamp">
+    {% for campion in listapentruhtml %}
+    <div class="card">
+        <div class="container">
+            <div class="row">
+                <div class="column"><p><img src="{{ campion.1|safe }}" title="{{ campion.0|safe }}" height="50"
+                                            width="50" alt="{{ campion.0 }}" class="circle responsive-img"></p></div>
+                <div class="column"><p><b> {{ campion.0|safe }}</b><br>
+                    CS 156.6 (5.4)</p></div>
+                <div class="column"><p><span class="grey-text text darken-2"><b>{{ campion.4|safe }}:1 KDA</b></span>
+                    <br>
+                    <span id="kda">{{ campion.5|safe }}/{{ campion.6|safe }}/{{ campion.7|safe }}</span></p></div>
+                <div class="column">
+                    <p class="kda">
+                <span class="grey-text text darken-2">
+                    <b>{{ campion.3|safe }}</b>
+                    <br>
+                    {{ campion.2|safe }} Played
+                </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</section>
+<style>
+    .kda {
+        text-align: center;
+    }
+
+    .column {
+        float: left;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .licamp .container {
+        margin-left: 5%;
+        margin-right: 0;
+        padding: 0;
+    }
+
+    .licamp .row {
+        margin-top: 0;
+        margin-bottom: 0;
+        width: 340px;
+    }
+
+    .mainstats .row {
+        width: 900px;
+    }
+
+    .licamp .card {
+        width: 340px;
+        height: 71px;
+    }
+
+    .mainstats .container {
+        margin: 0 auto;
+    }
+
+    .mainstats .black-text {
+        font-size: 250%;
+    }
+
+    .card-panel {
+        height: 225px;
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+
+    .black-text {
+        font-size: 50px;
+    }
+
+    #kda {
+        font-size: 101%;
+    }
+</style>
 {% endblock%}

@@ -12,7 +12,7 @@ api_key = config.get('auth', 'api_key')
 
 
 def summonerid(summoner_name, region):
-    global profileIcon, summonerlevel
+    global profileIcon, summonerlevel, summoner_name_real
     link = "https://" + region + ".api.riotgames.com/lol/summoner/v3/summoners/by-name/" + \
            summoner_name.replace(" ", "%20") + "?api_key=" + api_key
     response = requests.get(link)
@@ -22,7 +22,7 @@ def summonerid(summoner_name, region):
         id_simple = obiect['id']
         profileIcon = obiect['profileIconId']
         summonerlevel = obiect['summonerLevel']
-
+        summoner_name_real = obiect['name']
         return id_simple, accountId
     else:
         print(response.status_code)
@@ -68,6 +68,17 @@ def rank(reg, summoner_id):
                winrate
     else:
         print(response.status_code)
+
+def inlocuire_nume(campion):
+    with open('champions.txt', 'r+') as file:
+        obiect = json.loads(file.readline())
+    a = list(obiect['data'])
+    id_champ = campion
+    for champ in a:
+        if obiect['data'][str(champ)]['id'] == id_champ:
+            nume = obiect['data'][str(champ)]['name']
+            nume_splashart = champ
+            return nume, nume_splashart
 
 
 def championwinrate(lista_meciuri, a, regiune, listacampionijucati):
@@ -115,13 +126,13 @@ def championwinrate(lista_meciuri, a, regiune, listacampionijucati):
                     for i in range(2):
                         lista[i] = obiect['teams'][i]['win']
                     for i in range(0, 10):
-                        if obiect['participantIdentities'][i]['player']['summonerName'].lower() == summoner_name.lower():
+                        if obiect['participantIdentities'][i]['player']['accountId'] == a_id:
                             participant_id = obiect['participantIdentities'][i]['participantId']
                         if obiect['participants'][i]['participantId'] == participant_id:
                             kills = obiect['participants'][i]['stats']['kills']
                             deaths = obiect['participants'][i]['stats']['deaths']
                             assists = obiect['participants'][i]['stats']['assists']
-                        if obiect['participantIdentities'][i]['player']['summonerName'].lower() == summoner_name.lower():
+                        if obiect['participantIdentities'][i]['player']['accountId'] == a_id:
                             if i + 1 <= 5 and lista[0] == 'Win':
                                 champID = obiect['participants'][i]['championId']
                                 games = 1
@@ -168,6 +179,7 @@ def championwinrate(lista_meciuri, a, regiune, listacampionijucati):
 
 
 def index(request):
+    print('Hello')
     global s_id, a_id, region, summoner_name
     if request.method == "POST":
         form = PostsForm(request.POST)
@@ -195,10 +207,7 @@ def index(request):
                 gameslist = json.loads(searchgamesplayed)
             else:
                 gameslist = []
-            print(len(listofgames))
-            print(len(gameslist))
             champ = championwinrate(listofgames, gameslist, region, champslist)
-            print(champ)
             if len(champ) != 0:
                 t.championsPlayed = champ
                 t.save()
@@ -222,21 +231,74 @@ def index(request):
 
 
 def stats(request):
+    print("stats")
     tier, mrank, leaguepoints, wins, losses, winrate = rank(region, s_id)
     icon = "http://ddragon.leagueoflegends.com/cdn/8.6.1/img/profileicon/" + str(profileIcon) + ".png"
     tier_icon = tier.lower() + "_" + mrank.lower() + ".png"
+
+    listapentruhtml = []
+    print('Helo')
+    searchchampsplayed = Posts.objects.filter(summoner_name=summoner_name, region=region).values('championsPlayed')[0][
+        'championsPlayed']
+    if len(searchchampsplayed) != 0:
+        listadinBDD = json.loads(searchchampsplayed)
+        listadinBDD.sort(key=lambda x: x[1], reverse=True)
+        for i in range(len(listadinBDD)):
+            campion = listadinBDD[i][0]
+            numar_jocuri = listadinBDD[i][1]
+            numar_winuri = listadinBDD[i][2]
+            numar_killuri = listadinBDD[i][3]
+            numar_deaths = listadinBDD[i][4]
+            numar_assists = listadinBDD[i][5]
+            avgkills = round(int(numar_killuri)/int(numar_jocuri), 1)
+            avgdeaths = round(int(numar_deaths)/int(numar_jocuri), 1)
+            avgassists = round(int(numar_assists)/int(numar_jocuri), 1)
+            nume, nume_splash = inlocuire_nume(campion)
+            splah_art = "http://ddragon.leagueoflegends.com/cdn/8.8.2/img/champion/" + nume_splash + ".png"
+            winrate_int = round((int(numar_winuri)/int(numar_jocuri))*100)
+            winrate_campion = str(winrate_int) + "%"
+            kda = round((int(numar_killuri) + int(numar_assists)) / int(numar_deaths), 2)
+            tulp = (nume, splah_art, numar_jocuri, winrate_campion, kda, avgkills, avgdeaths, avgassists)
+            listapentruhtml.append(tulp)
+        print(listapentruhtml)
+
+
     return render(request, 'posts/stats.html', {
-        'name': summoner_name,
+        'name': summoner_name_real,
         'summonerlevel': summonerlevel,
         'icon': icon,
-        'tier': tier + " " + mrank,
+        'tier': tier.title() + " " + mrank,
         'leaguepoints': str(leaguepoints) + 'LP',
         'wins': str(wins) + 'W',
         'losses': str(losses) + 'L',
         'winrate': str(round(winrate)) + '%',
         'tier_icon': tier_icon,
+        'listapentruhtml': listapentruhtml,
         'title': 'Aici o sa vezi statsurile',
     })
 
-#def champswinrate(request):
-
+# def champswinrate(request):
+#     listapentruhtml = []
+#     print('Helo')
+#     searchchampsplayed = Posts.objects.filter(summoner_name=summoner_name, region=region).values('championsPlayed')[0][
+#         'championsPlayed']
+#     if len(searchchampsplayed) != 0:
+#         listadinBDD = json.loads(searchchampsplayed)
+#         listadinBDD.sort(key=lambda x: x[1], reverse=True)
+#         for i in range(len(listadinBDD)):
+#             campion = listadinBDD[i][0]
+#             numar_jocuri = listadinBDD[i][1]
+#             numar_winuri = listadinBDD[i][2]
+#             numar_killuri = listadinBDD[i][3]
+#             numar_deaths = listadinBDD[i][4]
+#             numar_assists = listadinBDD[i][5]
+#             splah_art = "http://ddragon.leagueoflegends.com/cdn/8.6.1/img/champion/" + listadinBDD[i][6] + ".png"
+#             winrate = int(numar_jocuri)/int(numar_winuri)
+#             kda = (int(numar_killuri) + int(numar_assists))/int(numar_deaths)
+#             nume = inlocuire_nume(campion)
+#             tulp = (nume, splah_art, numar_jocuri,winrate, kda)
+#             listapentruhtml.append(tulp)
+#         print(listapentruhtml)
+#     return render(request, 'posts/stats.html', {
+#         'listapentruhtml': listapentruhtml
+#     })

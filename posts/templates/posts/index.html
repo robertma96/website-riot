@@ -10,6 +10,28 @@
     <p><b>Region: </b></p>
     {{ form.region }}
     <br><br><br>
-    <input type="submit" class="waves-effect waves-light btn" value="Search">
+    <input onclick="myFunction()" type="submit" class="waves-effect waves-light btn" value="Search">
 </form>
+
+
+<!--<button onclick="myFunction()">Click Me</button>-->
+
+<div id="myDIV" style="display: none">
+    <p class="flow-text" style="text-align: center">Plese wait while your games are being analyzed. This depends on how many games you've played so far.</p>
+    <div class="progress">
+        <div class="indeterminate"></div>
+    </div>
+</div>
+
+<script>
+    function myFunction() {
+        var x = document.getElementById("myDIV");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+</script>
+
 {% endblock %}
